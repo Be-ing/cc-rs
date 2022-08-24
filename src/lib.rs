@@ -1924,7 +1924,7 @@ impl Build {
         let mut cmd = windows_registry::find(&target, tool).unwrap_or_else(|| self.cmd(tool));
         cmd.arg("-nologo"); // undocumented, yet working with armasm[64]
         for directory in self.include_directories.iter() {
-            cmd.arg("-I").arg(directory);
+            cmd.arg("/I").arg(directory);
         }
         if target.contains("aarch64") || target.contains("arm") {
             println!("cargo:warning=The MSVC ARM assemblers do not support -D flags");
