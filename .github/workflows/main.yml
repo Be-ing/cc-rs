@@ -31,6 +31,10 @@ jobs:
             rust: stable
             os: macos-latest
             no_run: --no-run
+          - target: aarch64-apple-tvos
+            rust: nightly-x86_64-apple-darwin
+            os: macos-latest
+            no_run: --no-run
           - target: aarch64-pc-windows-msvc
             rust: stable
             os: windows-latest
@@ -60,6 +64,9 @@ jobs:
         rustup toolchain install ${{ matrix.rust }} --no-self-update --profile minimal --target ${{ matrix.target }}
         rustup default ${{ matrix.rust }}
       shell: bash
+    - name: Install rust-src
+      run: rustup component add rust-src --toolchain ${{ matrix.rust }}
+      if: matrix.target == 'aarch64-apple-tvos'
     - name: Install g++-multilib
       run: |
         set -e
@@ -76,24 +83,6 @@ jobs:
     - run: cargo test ${{ matrix.no_run }} --manifest-path cc-test/Cargo.toml --target ${{ matrix.target }}
     - run: cargo test ${{ matrix.no_run }} --manifest-path cc-test/Cargo.toml --target ${{ matrix.target }} --features parallel
     - run: cargo test ${{ matrix.no_run }} --manifest-path cc-test/Cargo.toml --target ${{ matrix.target }} --release
-
-  check-tvos:
-    name: Test aarch64-apple-tvos
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install Rust (rustup)
-      run: |
-        set -euxo pipefail
-        rustup toolchain install nightly --no-self-update --profile minimal
-        rustup component add rust-src --toolchain nightly
-        rustup default nightly
-      shell: bash
-    - run: cargo test -Z build-std=std --no-run --target aarch64-apple-tvos
-    - run: cargo test -Z build-std=std --no-run --features parallel --target aarch64-apple-tvos
-    - run: cargo test -Z build-std=std --no-run --manifest-path cc-test/Cargo.toml --target aarch64-apple-tvos
-    - run: cargo test -Z build-std=std --no-run --manifest-path cc-test/Cargo.toml --target aarch64-apple-tvos --features parallel
-    - run: cargo test -Z build-std=std --no-run --manifest-path cc-test/Cargo.toml --target aarch64-apple-tvos --release
 
   cuda:
     name: Test CUDA support
