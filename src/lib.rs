@@ -2382,15 +2382,21 @@ impl Build {
 
         let sdk = match arch {
             ArchSpec::Device(_) if is_mac => {
-                cmd.args
-                    .push(format!("-mmacosx-version-min={}", min_version).into());
+                let flag = "-mmacosx-version-min".into();
+                if !cmd.args.contains(&flag) {
+                    cmd.args
+                        .push(format!("{}={}", flag.to_str().unwrap(), min_version).into());
+                }
                 "macosx".to_owned()
             }
             ArchSpec::Device(arch) => {
                 cmd.args.push("-arch".into());
                 cmd.args.push(arch.into());
-                cmd.args
-                    .push(format!("-m{}os-version-min={}", sdk_prefix, min_version).into());
+                let flag = format!("-m{}os-version-min", sdk_prefix).into();
+                if !cmd.args.contains(&flag) {
+                    cmd.args
+                        .push(format!("{}={}", flag.to_str().unwrap(), min_version).into());
+                }
                 format!("{}os", sdk_prefix)
             }
             ArchSpec::Simulator(arch) => {
@@ -2401,8 +2407,11 @@ impl Build {
                     cmd.args.push("-arch".into());
                     cmd.args.push(arch.into());
                 }
-                cmd.args
-                    .push(format!("-m{}simulator-version-min={}", sim_prefix, min_version).into());
+                let flag = format!("-m{}simulator-version-min", sim_prefix).into();
+                if !cmd.args.contains(&flag) {
+                    cmd.args
+                        .push(format!("{}={}", flag.to_str().unwrap(), min_version).into());
+                }
                 format!("{}simulator", sdk_prefix)
             }
             ArchSpec::Catalyst(_) => "macosx".to_owned(),
